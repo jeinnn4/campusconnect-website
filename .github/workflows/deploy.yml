@@ -9,8 +9,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: List files for debug
-        run: ls -la
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v0.1.5
         with:
@@ -19,8 +17,14 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            # Go to home directory
+            cd /home/ubuntu
+            # Remove old website files
             sudo rm -rf /var/www/html/*
-            sudo cp -r ./website/. /var/www/html/
+            # Copy website folder contents using full path from home directory
+            sudo cp -r $GITHUB_WORKSPACE/website/. /var/www/html/
+            # Fix permissions so nginx can read
             sudo chown -R www-data:www-data /var/www/html
             sudo chmod -R 755 /var/www/html
+            # Restart nginx to apply changes
             sudo systemctl restart nginx
