@@ -2,13 +2,15 @@ name: Deploy Website to EC2
 on:
   push:
     branches:
-      - main  # triggers only on pushes to main branch
+      - main
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: List files for debug
+        run: ls -la
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v0.1.5
         with:
@@ -18,7 +20,7 @@ jobs:
           port: 22
           script: |
             sudo rm -rf /var/www/html/*
-            sudo cp -r ./* /var/www/html/
+            sudo cp -r ./website/. /var/www/html/
             sudo chown -R www-data:www-data /var/www/html
             sudo chmod -R 755 /var/www/html
             sudo systemctl restart nginx
